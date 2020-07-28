@@ -1,3 +1,11 @@
+mod godaddy;
+use godaddy::*;
+
 fn main() {
-    println!("Hello, world!");
+    let authority =
+        Authority::new("", "secret", api_url::PRODUCTION);
+
+    authority.update_subdoomain("test", RecordType::A)
+
+
 }
