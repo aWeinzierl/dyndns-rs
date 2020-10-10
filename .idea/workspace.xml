@@ -13,27 +13,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f28ed29d-3e9c-447d-a2f0-c5ba6314b69a" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/dns_record_list.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/error.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/godaddy/dns_data.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/godaddy/dns_record.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/godaddy/error.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/godaddy/predefined_url.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/godaddy_handler/authentication_data.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/godaddy_handler/godaddy_handler.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/godaddy_handler/mod.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/retry_handler.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/update_handler/mod.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/update_handler/update_handler.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dyndns-service-godaddy.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dyndns-service-godaddy.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.travis.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/appveyor.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Cargo.lock" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.toml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/godaddy/authority.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/godaddy/authority.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/godaddy/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/godaddy/mod.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/godaddy/record_type.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/godaddy/record_type.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -72,11 +55,11 @@
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\andre\Documents\git\dyndns-service-godaddy" />
       <recent name="C:\Users\andre\Documents\git\dyndns-service-godaddy\src\update_handler" />
       <recent name="C:\Users\andre\Documents\git\dyndns-service-godaddy\src\godaddy_handler" />
       <recent name="C:\Users\andre\Documents\git\dyndns-service-godaddy\src" />
       <recent name="C:\Users\andre\Documents\git\dyndns-service-godaddy\src\godaddy_handler\authentication_data" />
-      <recent name="C:\Users\andre\Git\dyndns-service-godaddy\src\godaddy" />
     </key>
   </component>
   <component name="RunManager">
@@ -119,7 +102,8 @@
       <workItem from="1601302108772" duration="100188000" />
       <workItem from="1601503624406" duration="2426000" />
       <workItem from="1602182852640" duration="1527000" />
-      <workItem from="1602187731100" duration="3586000" />
+      <workItem from="1602187731100" duration="8311000" />
+      <workItem from="1602259317483" duration="661000" />
     </task>
     <servers />
   </component>
@@ -151,26 +135,26 @@
       <screen x="0" y="0" width="3840" height="2130" />
     </state>
     <state x="676" y="1444" key="FileChooserDialogImpl/0.0.3840.2130@0.0.3840.2130" timestamp="1596980262898" />
-    <state width="1874" height="311" key="GridCell.Tab.0.bottom" timestamp="1602190467335">
+    <state width="1874" height="311" key="GridCell.Tab.0.bottom" timestamp="1602259284220">
       <screen x="0" y="30" width="3840" height="2130" />
     </state>
     <state width="1876" height="353" key="GridCell.Tab.0.bottom/0.0.3840.2130@0.0.3840.2130" timestamp="1601310536864" />
-    <state width="1874" height="311" key="GridCell.Tab.0.bottom/0.30.3840.2130@0.30.3840.2130" timestamp="1602190467335" />
-    <state width="1874" height="311" key="GridCell.Tab.0.center" timestamp="1602190467335">
+    <state width="1874" height="311" key="GridCell.Tab.0.bottom/0.30.3840.2130@0.30.3840.2130" timestamp="1602259284220" />
+    <state width="1874" height="311" key="GridCell.Tab.0.center" timestamp="1602259284220">
       <screen x="0" y="30" width="3840" height="2130" />
     </state>
     <state width="1876" height="353" key="GridCell.Tab.0.center/0.0.3840.2130@0.0.3840.2130" timestamp="1601310536864" />
-    <state width="1874" height="311" key="GridCell.Tab.0.center/0.30.3840.2130@0.30.3840.2130" timestamp="1602190467335" />
-    <state width="1874" height="311" key="GridCell.Tab.0.left" timestamp="1602190467335">
+    <state width="1874" height="311" key="GridCell.Tab.0.center/0.30.3840.2130@0.30.3840.2130" timestamp="1602259284220" />
+    <state width="1874" height="311" key="GridCell.Tab.0.left" timestamp="1602259284220">
       <screen x="0" y="30" width="3840" height="2130" />
     </state>
     <state width="1876" height="353" key="GridCell.Tab.0.left/0.0.3840.2130@0.0.3840.2130" timestamp="1601310536864" />
-    <state width="1874" height="311" key="GridCell.Tab.0.left/0.30.3840.2130@0.30.3840.2130" timestamp="1602190467335" />
-    <state width="1874" height="311" key="GridCell.Tab.0.right" timestamp="1602190467335">
+    <state width="1874" height="311" key="GridCell.Tab.0.left/0.30.3840.2130@0.30.3840.2130" timestamp="1602259284220" />
+    <state width="1874" height="311" key="GridCell.Tab.0.right" timestamp="1602259284220">
       <screen x="0" y="30" width="3840" height="2130" />
     </state>
     <state width="1876" height="353" key="GridCell.Tab.0.right/0.0.3840.2130@0.0.3840.2130" timestamp="1601310536864" />
-    <state width="1874" height="311" key="GridCell.Tab.0.right/0.30.3840.2130@0.30.3840.2130" timestamp="1602190467335" />
+    <state width="1874" height="311" key="GridCell.Tab.0.right/0.30.3840.2130@0.30.3840.2130" timestamp="1602259284220" />
     <state x="2381" y="1245" key="SettingsEditor" timestamp="1596263142781">
       <screen x="0" y="0" width="3840" height="2130" />
     </state>
@@ -192,11 +176,11 @@
       <screen x="0" y="0" width="3840" height="2130" />
     </state>
     <state x="1841" y="625" key="run.anything.popup/0.0.3840.2130@0.0.3840.2130" timestamp="1596748469023" />
-    <state x="2543" y="1332" width="672" height="678" key="search.everywhere.popup" timestamp="1601515753812">
+    <state x="2543" y="1332" width="672" height="678" key="search.everywhere.popup" timestamp="1602191762128">
       <screen x="0" y="30" width="3840" height="2130" />
     </state>
     <state x="2543" y="1302" width="672" height="678" key="search.everywhere.popup/0.0.3840.2130@0.0.3840.2130" timestamp="1601102096964" />
-    <state x="2543" y="1332" width="672" height="678" key="search.everywhere.popup/0.30.3840.2130@0.30.3840.2130" timestamp="1601515753812" />
+    <state x="2543" y="1332" width="672" height="678" key="search.everywhere.popup/0.30.3840.2130@0.30.3840.2130" timestamp="1602191762128" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
