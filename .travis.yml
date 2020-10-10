@@ -128,6 +128,7 @@ branches:
     # release tags
     - /^v\d+\.\d+\.\d+.*$/
     - master
+    - bootstrap
 
 notifications:
   email:
