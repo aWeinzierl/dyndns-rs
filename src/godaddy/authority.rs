@@ -1,4 +1,5 @@
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
+use std::panic::panic_any;
 
 use super::DnsData;
 use super::DnsRecord;
@@ -15,7 +16,7 @@ impl Authority {
         let mut headers = reqwest::header::HeaderMap::new();
         let auth_value = match reqwest::header::HeaderValue::from_str(
             &("sso-key ".to_owned() + api_key + ":" + api_secret)) {
-            Err(e) => panic!(e),
+            Err(e) => panic_any(e),
             Ok(h) => h
         };
         headers.insert(reqwest::header::AUTHORIZATION, auth_value);
@@ -23,7 +24,7 @@ impl Authority {
         let client = match reqwest::Client::builder()
             .default_headers(headers)
             .build() {
-            Err(e) => panic!(e),
+            Err(e) => panic_any(e),
             Ok(c) => c
         };
 
