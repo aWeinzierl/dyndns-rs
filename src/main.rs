@@ -1,15 +1,15 @@
 #![feature(async_closure)]
-#![feature(box_syntax)]
 
 use std::collections::{HashMap, HashSet};
 use std::convert::AsRef;
-use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
+use std::future::Future;
+use std::net::{Ipv4Addr, Ipv6Addr};
 use std::str::FromStr;
 
+use error::Error;
 use futures_retry::FutureRetry;
 use preferences::{AppInfo, Preferences};
-use public_ip::{BoxToResolver, dns, ToResolver};
-use public_ip::dns::DnsResolverOptions;
+use public_ip::{addr_v6, addr_v4};
 use serde::{Deserialize, Serialize};
 use strum_macros::{AsRefStr, EnumDiscriminants, EnumString};
 
@@ -66,17 +66,16 @@ create_handlers(data: AuthenticationData)
 }
 
 async fn
-get_ip_address_by_resolver(resolver: &'static DnsResolverOptions<'_>) -> Result<IpAddr, error::Error> {
+get_ip_address_by_resolver<Resolver, AddrFuture, AddrType>(resolve: Resolver) -> Option<AddrType> 
+where 
+    Resolver: Fn() -> AddrFuture + Clone + Send + 'static,
+    AddrFuture: Future<Output = Option<AddrType>> + Send + 'static,
+    {
     let ip = FutureRetry::new(
-        async || {
-            let res = BoxToResolver::new(resolver).to_resolver();
-            match public_ip::resolve_address(res).await {
-                Some(ip) => Ok(ip),
-                None => Err(error::Error::ResolverError("".to_owned())),
-            }
-        }, retry_handler(),
-    ).await?.0;
-    Ok(ip)
+        async || resolve().await.ok_or(()), 
+        retry_handler(),
+    ).await.ok()?.0;
+    Some(ip)
 }
 
 fn collect_record_types(dns_record_list: &DnsRecordList) -> HashSet<RecordType> {
@@ -95,9 +94,9 @@ fn generate_should_be_processed(records: &HashSet<RecordType>) -> Box<dyn Fn(Rec
     match records.len() {
         1 => {
             let record_in_set = *records.iter().next().unwrap();
-            box move |record: RecordType| record_in_set == record
+            Box::new(move |record: RecordType| record_in_set == record)
         }
-        2 => box |_| true,
+        2 => Box::new(|_| true),
         _ => panic!("Got three different record types, although only 2 should exist")
     }
 }
@@ -113,21 +112,13 @@ async fn main() -> Result<(), error::Error> {
 
     let mut ipv4: Option<Ipv4Addr> = None;
     if should_be_processed(RecordType::A) {
-        const V4_RESOLVER: &'static DnsResolverOptions = &dns::OPENDNS_RESOLVER_V4;
-        ipv4 = match get_ip_address_by_resolver(V4_RESOLVER).await? {
-            IpAddr::V4(ip) => Some(ip),
-            _ => panic!("Got IPv6, but expected IPv4"),
-        }
-    };
+        ipv4 = Some(get_ip_address_by_resolver(addr_v4).await.ok_or(Error::ResolverError("no IPV4 found".to_owned()))?);
+    }
 
     let mut ipv6: Option<Ipv6Addr> = None;
     if should_be_processed(RecordType::AAAA) {
-        const V6_RESOLVER: &'static DnsResolverOptions = &dns::OPENDNS_RESOLVER_V6;
-        ipv6 = match get_ip_address_by_resolver(V6_RESOLVER).await? {
-            IpAddr::V6(ip) => Some(ip),
-            _ => panic!("Got IPv4, but expected IPv6"),
-        };
-    }
+        ipv6 = Some(get_ip_address_by_resolver(addr_v6).await.ok_or(Error::ResolverError("no IPv6 found".to_owned()))?);
+    };
 
     match IPs::load(&APP_INFO, IP_KEY) {
         Ok(ips) => {

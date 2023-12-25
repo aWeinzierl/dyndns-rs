@@ -1,7 +1,5 @@
 use std::time::Duration;
 
-use crate::error::Error;
-
 pub struct RetryHandler {
     max_attempts: usize,
     base_delay: u64,
@@ -30,10 +28,10 @@ fn from(u: usize) -> u32 {
     }
 }
 
-impl futures_retry::ErrorHandler<Error> for RetryHandler
+impl futures_retry::ErrorHandler<()> for RetryHandler
 {
-    type OutError = Error;
-    fn handle(&mut self, failed_attempt: usize, e: Error) -> futures_retry::RetryPolicy<Error> {
+    type OutError = ();
+    fn handle(&mut self, failed_attempt: usize, e: ()) -> futures_retry::RetryPolicy<()> {
         if failed_attempt == self.max_attempts {
             return futures_retry::RetryPolicy::ForwardError(e);
         }
