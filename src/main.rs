@@ -1,7 +1,6 @@
 #![feature(async_closure)]
 
 use std::collections::{HashMap, HashSet};
-use std::convert::AsRef;
 use std::future::Future;
 use std::net::{Ipv4Addr, Ipv6Addr};
 use std::str::FromStr;
@@ -80,10 +79,12 @@ where
 
 fn collect_record_types(dns_record_list: &DnsRecordList) -> HashSet<RecordType> {
     let mut set: HashSet<RecordType> = HashSet::new();
-    for dns_record in dns_record_list {
-        for specification in &dns_record.specifications {
+    for service in dns_record_list{
+        for specification in &service.specifications {
             for specification in &specification.specifications {
-                set.insert(specification.record_type);
+                for specification in &specification.specifications {
+                    set.insert(specification.record_type);
+                }
             }
         }
     }
@@ -103,7 +104,7 @@ fn generate_should_be_processed(records: &HashSet<RecordType>) -> Box<dyn Fn(Rec
 
 #[tokio::main]
 async fn main() -> Result<(), error::Error> {
-    let dns_entries =
+    let dns_entries: Vec<dns_record_list::ServiceSpecifications> =
         DnsRecordList::load(&APP_INFO, DNS_ENTRIES_KEY)?;
 
     let mut records = collect_record_types(&dns_entries);
@@ -153,28 +154,29 @@ async fn main() -> Result<(), error::Error> {
             .map(create_handlers)
             .collect();
 
-    let discrim_string = AuthenticationDataDiscriminants::GoDaddy.as_ref();
-    let vendor = AuthenticationDataDiscriminants::from_str(discrim_string).unwrap();
-    for dns_entry in dns_entries {
-        for host in dns_entry.specifications {
-            for record in host.specifications {
-                if !should_be_processed(record.record_type) { continue; }
+    for service in dns_entries {
+        let service_discriminant = AuthenticationDataDiscriminants::from_str(service.service_name.as_str()).unwrap();
+        for dns_entry in service.specifications {
+            for host in dns_entry.specifications {
+                for record in host.specifications {
+                    if !should_be_processed(record.record_type) { continue; }
 
-                let handler = vendor_to_handler.get(&vendor).unwrap();
-                match record.record_type {
-                    RecordType::A =>
-                        handler.update_ipv4_record(DnsRecord {
-                            domain: dns_entry.domain_name.as_str(),
-                            host: host.host_name.as_str(),
-                            ttl: record.ttl,
-                        }, ipv4.unwrap()).await?,
-                    RecordType::AAAA =>
-                        handler.update_ipv6_record(DnsRecord {
-                            domain: dns_entry.domain_name.as_str(),
-                            host: host.host_name.as_str(),
-                            ttl: record.ttl,
-                        }, ipv6.unwrap()).await?,
-                };
+                    let handler = vendor_to_handler.get(&service_discriminant).unwrap();
+                    match record.record_type {
+                        RecordType::A =>
+                            handler.update_ipv4_record(DnsRecord {
+                                domain: dns_entry.domain_name.as_str(),
+                                host: host.host_name.as_str(),
+                                ttl: record.ttl,
+                            }, ipv4.unwrap()).await?,
+                        RecordType::AAAA =>
+                            handler.update_ipv6_record(DnsRecord {
+                                domain: dns_entry.domain_name.as_str(),
+                                host: host.host_name.as_str(),
+                                ttl: record.ttl,
+                            }, ipv6.unwrap()).await?,
+                    };
+                }
             }
         }
     }

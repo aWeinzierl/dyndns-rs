@@ -24,45 +24,50 @@ DNS-record specification example configuration:
 ```JSON
 [
   {
-    "domain_name": "github.com",
+    "service_name": "GoDaddy",
     "specifications": [
       {
-        "host_name": "@",
+        "domain_name": "github.com",
         "specifications": [
           {
-            "record_type": "AAAA",
-            "ttl": 600
+            "host_name": "@",
+            "specifications": [
+              {
+                "record_type": "AAAA",
+                "ttl": 600
+              },
+              {
+                "record_type": "A",
+                "ttl": 600
+              }
+            ]
           },
           {
-            "record_type": "A",
-            "ttl": 600
+            "host_name": "test",
+            "specifications": [
+              {
+                "record_type": "AAAA",
+                "ttl": 600
+              },
+              {
+                "record_type": "A",
+                "ttl": 600
+              }
+            ]
           }
         ]
       },
       {
-        "host_name": "test",
+        "domain_name": "matrix.org",
         "specifications": [
           {
-            "record_type": "AAAA",
-            "ttl": 600
-          },
-          {
-            "record_type": "A",
-            "ttl": 600
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "domain_name": "matrix.org",
-    "specifications": [
-      {
-        "host_name": "@",
-        "specifications": [
-          {
-            "record_type": "AAAA",
-            "ttl": 600
+            "host_name": "@",
+            "specifications": [
+              {
+                "record_type": "AAAA",
+                "ttl": 600
+              }
+            ]
           }
         ]
       }
