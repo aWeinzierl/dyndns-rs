@@ -1,4 +1,3 @@
-pub use update_handler::{CreatableUpdateHandler, DnsRecord, UpdateHandler};
+pub use update_handler::UpdateHandler;
 
 mod update_handler;
-

@@ -3,13 +3,13 @@ use serde::{Deserialize, Serialize};
 use godaddy::PredefinedUrl;
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct GoDaddyAuthenticationData {
+pub struct AuthenticationData {
     pub api_key: String,
     pub api_secret: String,
     pub api_url: ApiUrl,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub enum ApiUrl {
     PredefinedUrl(PredefinedUrl),
     CustomUrl(url::Url),

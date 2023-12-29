@@ -11,7 +11,7 @@ impl From<PredefinedUrl> for url::Url {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub enum PredefinedUrl {
     OTE,
     PRODUCTION,

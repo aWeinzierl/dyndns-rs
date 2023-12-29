@@ -1,49 +1,48 @@
 use std::net::{Ipv4Addr, Ipv6Addr};
 
-use async_trait::async_trait;
+use godaddy::{self, RecordType};
 
-use godaddy;
-
+use crate::dns_record_list::RecordSpecification;
 use crate::error::Error;
-use crate::update_handler::{CreatableUpdateHandler, DnsRecord, UpdateHandler};
+use crate::update_handler::UpdateHandler;
 
-use super::GoDaddyAuthenticationData;
+use super::AuthenticationData;
 
-pub struct GodaddyHandler {
+pub struct GoDaddyHandler {
     authority: godaddy::Authority,
 }
 
-
-impl CreatableUpdateHandler<GoDaddyAuthenticationData> for GodaddyHandler {
-    fn new(auth_data: GoDaddyAuthenticationData) -> Box<dyn UpdateHandler> {
-        let handler = GodaddyHandler {
+impl UpdateHandler<AuthenticationData, RecordSpecification> for GoDaddyHandler {
+    fn new(auth_data: &AuthenticationData) -> GoDaddyHandler {
+        let handler = GoDaddyHandler {
             authority: godaddy::Authority::new(
                 auth_data.api_key.as_str(),
                 auth_data.api_secret.as_str(),
-                auth_data.api_url.into(),
+                auth_data.api_url.clone().into(),
             )
         };
-        Box::new(handler)
+        handler
     }
-}
 
-#[async_trait]
-impl UpdateHandler for GodaddyHandler {
-    async fn update_ipv4_record(&self, dns_record: DnsRecord<'_>, ip: Ipv4Addr) -> Result<(), Error> {
-        self.authority.update_ipv4_address(
-            dns_record.domain,
-            dns_record.host,
+    fn record_type(&self, specification: &RecordSpecification) -> RecordType{
+        specification.record_type
+    }
+
+    async fn update_ipv6_record(&self, specification: &RecordSpecification, domain: &str, host: &str, ip: Ipv6Addr) -> Result<(), Error>{        
+        self.authority.update_ipv6_address(
+            domain,
+            host,
             &ip,
-            dns_record.ttl,
+            specification.ttl,
         ).await?;
         Ok(())
     }
-    async fn update_ipv6_record(&self, dns_record: DnsRecord<'_>, ip: Ipv6Addr) -> Result<(), Error> {
-        self.authority.update_ipv6_address(
-            dns_record.domain,
-            dns_record.host,
+    async fn update_ipv4_record(&self, specification: &RecordSpecification, domain: &str, host: &str, ip: Ipv4Addr) -> Result<(), Error> {
+        self.authority.update_ipv4_address(
+            domain,
+            host,
             &ip,
-            dns_record.ttl,
+            specification.ttl,
         ).await?;
         Ok(())
     }

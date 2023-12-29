@@ -5,6 +5,7 @@ pub enum Error {
     PreferencesError(preferences::PreferencesError),
     ReqwestError(reqwest::Error),
     ResolverError(String),
+    AuthenticationError(String),
     GodaddyError(godaddy::Error),
 }
 
