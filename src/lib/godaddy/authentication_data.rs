@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::PredefinedUrl;
+use super::PredefinedUrl;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct AuthenticationData {
