@@ -1,7 +1,8 @@
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 use std::panic::panic_any;
 
-use crate::error::Error;
+use reqwest::StatusCode;
+
 use crate::update_handler::UpdateHandler;
 use crate::RecordType;
 
@@ -9,6 +10,8 @@ use super::{AuthenticationData, RecordSpecification};
 
 pub struct Handler {
     http_client: reqwest::Client,
+    user: String,
+    password: String,
 }
 
 impl Handler {
@@ -17,39 +20,39 @@ impl Handler {
         domain: &str,
         name: &str,
         ip: &IpAddr,
-    ) -> Result<(), Error> {
-        let _ = self
+    ) -> Result<(), super::Error> {
+        let host_name = match name {
+            "@" => domain.to_owned(),
+            _ => format!("{name}.{domain}"),
+        };
+        let response = self
             .http_client
-            .get(
-                &(format!("https://ydns.io/api/v1/update/?host={name}.{domain}&ip={ip}")),
-            )
+            .get(&(format!("https://ydns.io/api/v1/update/?host={host_name}&ip={ip}")))
+            .basic_auth(&self.user, Some(&self.password))
             .send()
-            .await?
-            .text()
             .await?;
-        Ok(())
+        let status = response.status();
+        match status {
+            StatusCode::OK => Ok(()),
+            _ => {
+                let text = response.text().await?;
+                Err(super::Error::Request(format!("Request failed with Code {status:?}: {text}")))
+            }
+        }
     }
-
 }
 
 impl UpdateHandler<AuthenticationData, RecordSpecification> for Handler {
-    fn new(AuthenticationData{username,secret}: &AuthenticationData) -> Self {
-        let mut headers = reqwest::header::HeaderMap::new();
-        let auth_value = match reqwest::header::HeaderValue::from_str(
-            &format!("{username}:{secret}")
-        ) {
-            Err(e) => panic_any(e),
-            Ok(h) => h,
-        };
-        headers.insert(reqwest::header::AUTHORIZATION, auth_value);
-
-        let client = match reqwest::Client::builder().default_headers(headers).build() {
+    fn new(AuthenticationData { username, secret }: &AuthenticationData) -> Self {
+        let client = match reqwest::Client::builder().build() {
             Err(e) => panic_any(e),
             Ok(c) => c,
         };
 
         let handler = Handler {
             http_client: client,
+            user: username.clone(),
+            password: secret.clone(),
         };
 
         handler
@@ -65,8 +68,9 @@ impl UpdateHandler<AuthenticationData, RecordSpecification> for Handler {
         domain: &str,
         host: &str,
         ip: Ipv4Addr,
-    ) -> Result<(), Error> {
-        self.update_ip_address(domain, host, &IpAddr::V4(ip)).await?;
+    ) -> Result<(), crate::Error> {
+        self.update_ip_address(domain, host, &IpAddr::V4(ip))
+            .await?;
         Ok(())
     }
     async fn update_ipv6_record(
@@ -75,8 +79,9 @@ impl UpdateHandler<AuthenticationData, RecordSpecification> for Handler {
         domain: &str,
         host: &str,
         ip: Ipv6Addr,
-    ) -> Result<(), Error> {
-        self.update_ip_address(domain, host, &IpAddr::V6(ip)).await?;
+    ) -> Result<(), crate::Error> {
+        self.update_ip_address(domain, host, &IpAddr::V6(ip))
+            .await?;
         Ok(())
     }
 }

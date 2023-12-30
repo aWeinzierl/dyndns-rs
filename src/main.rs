@@ -38,7 +38,7 @@ struct IPs {
 }
 
 const APP_INFO: AppInfo = AppInfo {
-    name: "DynDns Service for Godaddy",
+    name: "DynDns Service",
     author: "Andreas Weinzierl",
 };
 const AUTH_KEY: &str = "authentication";
@@ -102,15 +102,13 @@ fn generate_should_be_processed(records: &HashSet<RecordType>) -> Box<dyn Fn(Rec
 
 #[tokio::main]
 async fn main() -> Result<(), error::Error> {
-    let dns_entries: Vec<dns_record_list::ServiceSpecifications> =
-        DnsRecordList::load(&APP_INFO, DNS_ENTRIES_KEY)?;
+    let dns_entries = DnsRecordList::load(&APP_INFO, DNS_ENTRIES_KEY)?;
 
     let mut records = collect_record_types(&dns_entries);
     if records.is_empty() {
         return Ok(());
     }
     let should_be_processed = generate_should_be_processed(&records);
-
     let mut ipv4: Option<Ipv4Addr> = None;
     if should_be_processed(RecordType::A) {
         ipv4 = Some(
