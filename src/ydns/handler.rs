@@ -2,11 +2,10 @@ use std::net::{Ipv4Addr, Ipv6Addr, IpAddr};
 
 use godaddy::{self, RecordType};
 
-use crate::dns_record_list::RecordSpecification;
 use crate::error::Error;
 use crate::update_handler::UpdateHandler;
 
-use super::AuthenticationData;
+use super::{AuthenticationData, RecordSpecification};
 
 use std::panic::panic_any;
 
@@ -15,7 +14,7 @@ pub struct Handler {
 }
 
 impl Handler{
-    async fn update_ip_address(&self, domain: &str, name: &str, ip: &IpAddr, ttl: u32, record_type: RecordType) -> Result<(), Error> {
+    async fn update_ip_address(&self, domain: &str, name: &str, ip: &IpAddr, record_type: RecordType) -> Result<(), Error> {
         let _ = self.http_client
             .get(&(
                 "URL here".to_owned() + "/v1/domains/" + domain + "/records/" + &record_type.to_string() + "/" + &name + ""))
@@ -24,15 +23,15 @@ impl Handler{
         Ok(())
     }
 
-    pub async fn update_ipv4_address(&self, domain: &str, name: &str, ip: &Ipv4Addr, ttl: u32)
+    pub async fn update_ipv4_address(&self, domain: &str, name: &str, ip: &Ipv4Addr)
         -> Result<(), Error> {
-    self.update_ip_address(domain, name, &IpAddr::V4(*ip), ttl, RecordType::A)
+    self.update_ip_address(domain, name, &IpAddr::V4(*ip), RecordType::A)
     .await
     }
 
-    pub async fn update_ipv6_address(&self, domain: &str, name: &str, ip: &Ipv6Addr, ttl: u32)
+    pub async fn update_ipv6_address(&self, domain: &str, name: &str, ip: &Ipv6Addr)
         -> Result<(), Error> {
-    self.update_ip_address(domain, name, &IpAddr::V6(*ip), ttl, RecordType::AAAA)
+    self.update_ip_address(domain, name, &IpAddr::V6(*ip), RecordType::AAAA)
     .await
     }
 
@@ -72,7 +71,6 @@ impl UpdateHandler<AuthenticationData, RecordSpecification> for Handler {
             domain,
             host,
             &ip,
-            specification.ttl,
         ).await?;
         Ok(())
     }
@@ -81,7 +79,6 @@ impl UpdateHandler<AuthenticationData, RecordSpecification> for Handler {
             domain,
             host,
             &ip,
-            specification.ttl,
         ).await?;
         Ok(())
     }

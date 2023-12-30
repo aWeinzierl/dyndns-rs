@@ -9,9 +9,9 @@ use futures_retry::FutureRetry;
 use preferences::{AppInfo, Preferences};
 use public_ip::{addr_v6, addr_v4};
 use serde::{Deserialize, Serialize};
-use strum_macros::{EnumDiscriminants, EnumString};
+use strum_macros::{EnumDiscriminants, EnumString, IntoStaticStr};
 
-use dns_record_list::{DnsRecordList, DomainSpecifications};
+use dns_record_list::{DnsRecordList, DomainSpecifications, HostSpecifications, ServiceSpecificationsDiscriminants};
 use godaddy::RecordType;
 use retry_handler::RetryHandler;
 
@@ -30,7 +30,7 @@ fn retry_handler() -> RetryHandler {
 
 type AuthenticationDataList = Vec<AuthenticationData>;
 
-#[derive(Serialize, Deserialize, Debug, EnumDiscriminants)]
+#[derive(Serialize, Deserialize, Debug, EnumDiscriminants, IntoStaticStr)]
 #[strum_discriminants(derive(EnumString, Hash))]
 enum AuthenticationData {
     GoDaddy(godaddy_handler::AuthenticationData),
@@ -64,16 +64,29 @@ where
     Some(ip)
 }
 
+struct DomainSpecificationIterator<Specification>{
+    host_index: usize,
+    record_index: usize,
+    specs: Vec<HostSpecifications<Specification>>,
+}
+
+fn collect_record_types_domain<Specification>(set: &mut HashSet<RecordType>, specifications: &Vec<DomainSpecifications<Specification>>){
+    for specs in specifications{
+        for specs in &specs.specifications{
+            for (record, _) in &specs.specifications{
+                set.insert(*record);
+            }
+        }
+    }
+}
+
 fn collect_record_types(dns_record_list: &DnsRecordList) -> HashSet<RecordType> {
     let mut set: HashSet<RecordType> = HashSet::new();
     for service in dns_record_list{
-        for specification in &service.specifications {
-            for specification in &specification.specifications {
-                for specification in &specification.specifications {
-                    set.insert(specification.record_type);
-                }
-            }
-        }
+        match service{
+            dns_record_list::ServiceSpecifications::GoDaddy(specs) => collect_record_types_domain(&mut set, specs),
+            dns_record_list::ServiceSpecifications::YDns(specs) => collect_record_types_domain(&mut set, specs),  
+        };
     }
     set
 }
@@ -136,25 +149,29 @@ async fn main() -> Result<(), error::Error> {
     let authentication_data_list =
         AuthenticationDataList::load(&APP_INFO, AUTH_KEY)?;
 
-    let service_to_auth_data: HashMap<AuthenticationDataDiscriminants, AuthenticationData> =
+    let service_to_auth_data: HashMap<ServiceSpecificationsDiscriminants, AuthenticationData> =
         authentication_data_list.into_iter()
-            .map(|auth_data| (AuthenticationDataDiscriminants::from(&auth_data), auth_data))
+            .map(|auth_data| {
+                let str: &str = (&auth_data).into();
+                let service_enum: ServiceSpecificationsDiscriminants = ServiceSpecificationsDiscriminants::from_str(str).expect("Each Authentification Method must have an associated Service");
+                (service_enum, auth_data)
+            })
             .collect();
 
     for service in dns_entries {
-        let service_discriminant = AuthenticationDataDiscriminants::from_str(service.service_name.as_str()).unwrap();
+        let service_discriminant= (&service).into();
         let auth_data = service_to_auth_data.get(&service_discriminant)
             .ok_or(Error::AuthenticationError(format!("No authentication data provided for {service_discriminant:?}.")))?;
-        match service_discriminant {
-            AuthenticationDataDiscriminants::GoDaddy => {
+        match service {
+            dns_record_list::ServiceSpecifications::GoDaddy(specifications) => {
                 let AuthenticationData::GoDaddy(auth_data) = auth_data else { unreachable!() };
                 let handler = godaddy_handler::GoDaddyHandler::new(auth_data);
-                handle_domains_by_service(handler, service.specifications, &should_be_processed, ipv4, ipv6).await?;
+                handle_domains_by_service(handler, specifications, &should_be_processed, ipv4, ipv6).await?;
             },
-            AuthenticationDataDiscriminants::YDns => {
+            dns_record_list::ServiceSpecifications::YDns(specifications) => {
                 let AuthenticationData::YDns(auth_data) = auth_data else { unreachable!() };
                 let handler = ydns::Handler::new(auth_data);
-                handle_domains_by_service(handler, service.specifications, &should_be_processed, ipv4, ipv6).await?;
+                handle_domains_by_service(handler, specifications, &should_be_processed, ipv4, ipv6).await?;
             },
         };
             
@@ -180,14 +197,13 @@ async fn handle_domains_by_service<'a, AuthData, RecordSpecification>(
 ) -> Result<(), error::Error> {
     for domain in specifications{
         for host in domain.specifications {
-            for record in host.specifications {
-                let record_type = handler.record_type(&record);
+            for (record_type, record_spec) in host.specifications {
                 if !should_be_processed(record_type) { continue; }
                 match record_type {
                     RecordType::A =>
-                        handler.update_ipv4_record(&record, &domain.domain_name, &host.host_name, ipv4.unwrap()).await?,
+                        handler.update_ipv4_record(&record_spec, &domain.domain_name, &host.host_name, ipv4.unwrap()).await?,
                     RecordType::AAAA =>
-                        handler.update_ipv6_record(&record, &domain.domain_name, &host.host_name, ipv6.unwrap()).await?,
+                        handler.update_ipv6_record(&record_spec, &domain.domain_name, &host.host_name, ipv6.unwrap()).await?,
                 }
             }
         }

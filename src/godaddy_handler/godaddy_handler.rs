@@ -2,11 +2,13 @@ use std::net::{Ipv4Addr, Ipv6Addr};
 
 use godaddy::{self, RecordType};
 
-use crate::dns_record_list::RecordSpecification;
+use super::record_specification::RecordSpecification;
 use crate::error::Error;
 use crate::update_handler::UpdateHandler;
 
 use super::AuthenticationData;
+
+
 
 pub struct GoDaddyHandler {
     authority: godaddy::Authority,
