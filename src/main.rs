@@ -91,6 +91,7 @@ fn collect_record_types(dns_record_list: &DnsRecordList) -> HashSet<RecordType> 
 
 fn generate_should_be_processed(records: &HashSet<RecordType>) -> Box<dyn Fn(RecordType) -> bool> {
     match records.len() {
+        0 => Box::new(|_| false),
         1 => {
             let record_in_set = *records.iter().next().unwrap();
             Box::new(move |record: RecordType| record_in_set == record)
@@ -117,7 +118,6 @@ async fn main() -> Result<(), error::Error> {
                 .ok_or(Error::ResolverError("no IPV4 found".to_owned()))?,
         );
     }
-
     let mut ipv6: Option<Ipv6Addr> = None;
     if should_be_processed(RecordType::AAAA) {
         ipv6 = Some(
@@ -127,28 +127,23 @@ async fn main() -> Result<(), error::Error> {
         );
     };
 
-    let mut old_ips = IPs::load(&APP_INFO, IP_KEY).unwrap_or_default(); 
+    let old_ips = IPs::load(&APP_INFO, IP_KEY).unwrap_or_default();
     match old_ips.ipv4 {
-        None => old_ips.ipv4 = ipv4,
+        None => {}
         Some(ip) => {
             if ipv4.is_some() && ipv4.unwrap() == ip {
                 records.remove(&RecordType::A);
-            } else {
-                old_ips.ipv4 = ipv4;
             }
         }
     }
     match old_ips.ipv6 {
-        None => old_ips.ipv6 = ipv6,
+        None => {}
         Some(ip) => {
             if ipv6.is_some() && ipv6.unwrap() == ip {
                 records.remove(&RecordType::AAAA);
-            } else {
-                old_ips.ipv6 = ipv6;
             }
         }
     }
-    let new_ips = old_ips;
 
     if records.is_empty() {
         return Ok(());
@@ -156,7 +151,6 @@ async fn main() -> Result<(), error::Error> {
     let should_be_processed = generate_should_be_processed(&records);
 
     let authentication_data_list = AuthenticationDataList::load(&APP_INFO, AUTH_KEY)?;
-
     let service_to_auth_data: HashMap<ServiceSpecificationsDiscriminants, AuthenticationData> =
         authentication_data_list
             .into_iter()
@@ -208,7 +202,11 @@ async fn main() -> Result<(), error::Error> {
             }
         };
     }
-    new_ips.save(&APP_INFO, IP_KEY)?;
+    IPs {
+        ipv4: ipv4,
+        ipv6: ipv6,
+    }
+    .save(&APP_INFO, IP_KEY)?;
     Ok(())
 }
 

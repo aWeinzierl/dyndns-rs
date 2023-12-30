@@ -36,7 +36,9 @@ impl Handler {
             StatusCode::OK => Ok(()),
             _ => {
                 let text = response.text().await?;
-                Err(super::Error::Request(format!("Request failed with Code {status:?}: {text}")))
+                Err(super::Error::Request(format!(
+                    "Request failed with Code {status:?}: {text}"
+                )))
             }
         }
     }
