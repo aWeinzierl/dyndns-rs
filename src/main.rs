@@ -1,6 +1,8 @@
 #![feature(async_closure)]
 
+mod authentication_data;
 mod dns_record_list;
+mod ips;
 mod retry_handler;
 
 use std::collections::{HashMap, HashSet};
@@ -8,33 +10,18 @@ use std::future::Future;
 use std::net::{Ipv4Addr, Ipv6Addr};
 use std::str::FromStr;
 
-use dyndns_rs::*;
 use futures_retry::FutureRetry;
+use ips::IPs;
 use preferences::{AppInfo, Preferences};
 use public_ip::{addr_v4, addr_v6};
-use serde::{Deserialize, Serialize};
-use strum_macros::{EnumDiscriminants, EnumString, IntoStaticStr};
 
+use authentication_data::{AuthenticationData, AuthenticationDataList};
 use dns_record_list::{DnsRecordList, DomainSpecifications, ServiceSpecificationsDiscriminants};
+use dyndns_rs::*;
 use retry_handler::RetryHandler;
 
 fn retry_handler() -> RetryHandler {
     RetryHandler::new(3, 100)
-}
-
-type AuthenticationDataList = Vec<AuthenticationData>;
-
-#[derive(Serialize, Deserialize, Debug, EnumDiscriminants, IntoStaticStr)]
-#[strum_discriminants(derive(EnumString, Hash))]
-enum AuthenticationData {
-    GoDaddy(godaddy::AuthenticationData),
-    YDns(ydns::AuthenticationData),
-}
-
-#[derive(Serialize, Deserialize, Debug, Default)]
-struct IPs {
-    ipv4: Option<Ipv4Addr>,
-    ipv6: Option<Ipv6Addr>,
 }
 
 const APP_INFO: AppInfo = AppInfo {
