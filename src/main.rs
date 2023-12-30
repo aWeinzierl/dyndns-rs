@@ -127,22 +127,15 @@ async fn main() -> Result<(), error::Error> {
         );
     };
 
-    let old_ips = IPs::load(&APP_INFO, IP_KEY).unwrap_or_default();
-    match old_ips.ipv4 {
-        None => {}
-        Some(ip) => {
-            if ipv4.is_some() && ipv4.unwrap() == ip {
-                records.remove(&RecordType::A);
-            }
-        }
-    }
-    match old_ips.ipv6 {
-        None => {}
-        Some(ip) => {
-            if ipv6.is_some() && ipv6.unwrap() == ip {
-                records.remove(&RecordType::AAAA);
-            }
-        }
+    if let Ok(old_ips) = IPs::load(&APP_INFO, IP_KEY) {
+        match (old_ips.ipv4, ipv4) {
+            (Some(ip_old), Some(ip_new)) if ip_old == ip_new => records.remove(&RecordType::A),
+            _ => false,
+        };
+        match (old_ips.ipv6, ipv6) {
+            (Some(ip_old), Some(ip_new)) if ip_old == ip_new => records.remove(&RecordType::AAAA),
+            _ => false,
+        };
     }
 
     if records.is_empty() {
