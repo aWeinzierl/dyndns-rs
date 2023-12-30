@@ -5,4 +5,3 @@ pub use record_specification::RecordSpecification;
 mod authentication_data;
 mod godaddy_handler;
 mod record_specification;
-

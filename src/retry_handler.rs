@@ -28,14 +28,14 @@ fn from(u: usize) -> u32 {
     }
 }
 
-impl futures_retry::ErrorHandler<()> for RetryHandler
-{
+impl futures_retry::ErrorHandler<()> for RetryHandler {
     type OutError = ();
     fn handle(&mut self, failed_attempt: usize, e: ()) -> futures_retry::RetryPolicy<()> {
         if failed_attempt == self.max_attempts {
             return futures_retry::RetryPolicy::ForwardError(e);
         }
         futures_retry::RetryPolicy::WaitRetry(Duration::from_millis(
-            self.base_delay.pow(from(failed_attempt))))
+            self.base_delay.pow(from(failed_attempt)),
+        ))
     }
 }
