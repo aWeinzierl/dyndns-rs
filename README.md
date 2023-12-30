@@ -7,71 +7,38 @@
 Login data example configuration:
 ```JSON
 [
-  {
-    "GoDaddy": {
-      "api_key": "Your API-key",
-      "api_secret": "Your API-secret",
-      "api_url": {
-     // "CustomUrl": "https://matrix.org/"
-        "PredefinedUrl": "Production"
-      }
+    {
+        "YDns":{
+            "username": "username",
+            "secret": "secret"
+        }
     }
-  }
 ]
 ```
 
 DNS-record specification example configuration:
 ```JSON
 [
-  {
-    "service_name": "GoDaddy",
-    "specifications": [
-      {
-        "domain_name": "github.com",
-        "specifications": [
-          {
-            "host_name": "@",
-            "specifications": [
-              {
-                "record_type": "AAAA",
-                "ttl": 600
-              },
-              {
-                "record_type": "A",
-                "ttl": 600
-              }
-            ]
-          },
-          {
-            "host_name": "test",
-            "specifications": [
-              {
-                "record_type": "AAAA",
-                "ttl": 600
-              },
-              {
-                "record_type": "A",
-                "ttl": 600
-              }
-            ]
-          }
+    {
+        "YDns": [
+            {
+                "domain_name": "matrix.org",
+                "specifications": [
+                    {
+                        "host_name": "@",
+                        "specifications": [
+                            {
+                                "record_type": "A"
+                            },
+                            {
+                                "record_type": "AAAA"
+                            }
+                        ]
+                    }
+                ]
+            }
         ]
-      },
-      {
-        "domain_name": "matrix.org",
-        "specifications": [
-          {
-            "host_name": "@",
-            "specifications": [
-              {
-                "record_type": "AAAA",
-                "ttl": 600
-              }
-            ]
-          }
-        ]
-      }
-    ]
-  }
+    }
 ]
 ```
+The JSON files need to be stored in `C:\Users\%username%\AppData\Roaming\Andreas Weinzierl\DynDns Service\` in Windows with the names `authentication.prefs.json` and `dns-entries.prefs.json`.
