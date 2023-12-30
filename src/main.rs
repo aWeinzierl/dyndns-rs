@@ -31,7 +31,7 @@ enum AuthenticationData {
     YDns(ydns::AuthenticationData),
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Default)]
 struct IPs {
     ipv4: Option<Ipv4Addr>,
     ipv6: Option<Ipv6Addr>,
@@ -127,27 +127,29 @@ async fn main() -> Result<(), error::Error> {
         );
     };
 
-    match IPs::load(&APP_INFO, IP_KEY) {
-        Ok(ips) => {
-            match ips.ipv4 {
-                None => {}
-                Some(ip) => {
-                    if ipv4.is_some() && ipv4.unwrap() == ip {
-                        records.remove(&RecordType::A);
-                    }
-                }
-            }
-            match ips.ipv6 {
-                None => {}
-                Some(ip) => {
-                    if ipv6.is_some() && ipv6.unwrap() == ip {
-                        records.remove(&RecordType::AAAA);
-                    }
-                }
+    let mut old_ips = IPs::load(&APP_INFO, IP_KEY).unwrap_or_default(); 
+    match old_ips.ipv4 {
+        None => old_ips.ipv4 = ipv4,
+        Some(ip) => {
+            if ipv4.is_some() && ipv4.unwrap() == ip {
+                records.remove(&RecordType::A);
+            } else {
+                old_ips.ipv4 = ipv4;
             }
         }
-        Err(_) => (),
-    };
+    }
+    match old_ips.ipv6 {
+        None => old_ips.ipv6 = ipv6,
+        Some(ip) => {
+            if ipv6.is_some() && ipv6.unwrap() == ip {
+                records.remove(&RecordType::AAAA);
+            } else {
+                old_ips.ipv6 = ipv6;
+            }
+        }
+    }
+    let new_ips = old_ips;
+
     if records.is_empty() {
         return Ok(());
     }
@@ -205,17 +207,6 @@ async fn main() -> Result<(), error::Error> {
                 .await?;
             }
         };
-    }
-
-    let mut new_ips = IPs {
-        ipv4: None,
-        ipv6: None,
-    };
-    if should_be_processed(RecordType::A) {
-        new_ips.ipv4 = Some(ipv4.unwrap())
-    }
-    if should_be_processed(RecordType::AAAA) {
-        new_ips.ipv6 = Some(ipv6.unwrap())
     }
     new_ips.save(&APP_INFO, IP_KEY)?;
     Ok(())
