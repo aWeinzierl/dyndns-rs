@@ -8,7 +8,7 @@ use std::future::Future;
 use std::net::{Ipv4Addr, Ipv6Addr};
 use std::str::FromStr;
 
-use dyndns_service_godaddy::*;
+use dyndns_rs::*;
 use futures_retry::FutureRetry;
 use preferences::{AppInfo, Preferences};
 use public_ip::{addr_v4, addr_v6};

@@ -17,19 +17,11 @@ impl Handler {
         domain: &str,
         name: &str,
         ip: &IpAddr,
-        record_type: RecordType,
     ) -> Result<(), Error> {
         let _ = self
             .http_client
             .get(
-                &("URL here".to_owned()
-                    + "/v1/domains/"
-                    + domain
-                    + "/records/"
-                    + &record_type.to_string()
-                    + "/"
-                    + &name
-                    + ""),
+                &(format!("https://ydns.io/api/v1/update/?host={name}.{domain}&ip={ip}")),
             )
             .send()
             .await?
@@ -38,32 +30,13 @@ impl Handler {
         Ok(())
     }
 
-    pub async fn update_ipv4_address(
-        &self,
-        domain: &str,
-        name: &str,
-        ip: &Ipv4Addr,
-    ) -> Result<(), Error> {
-        self.update_ip_address(domain, name, &IpAddr::V4(*ip), RecordType::A)
-            .await
-    }
-
-    pub async fn update_ipv6_address(
-        &self,
-        domain: &str,
-        name: &str,
-        ip: &Ipv6Addr,
-    ) -> Result<(), Error> {
-        self.update_ip_address(domain, name, &IpAddr::V6(*ip), RecordType::AAAA)
-            .await
-    }
 }
 
 impl UpdateHandler<AuthenticationData, RecordSpecification> for Handler {
-    fn new(auth_data: &AuthenticationData) -> Self {
+    fn new(AuthenticationData{username,secret}: &AuthenticationData) -> Self {
         let mut headers = reqwest::header::HeaderMap::new();
         let auth_value = match reqwest::header::HeaderValue::from_str(
-            &("sso-key ".to_owned() + &auth_data.username + ":" + &auth_data.secret),
+            &format!("{username}:{secret}")
         ) {
             Err(e) => panic_any(e),
             Ok(h) => h,
@@ -93,7 +66,7 @@ impl UpdateHandler<AuthenticationData, RecordSpecification> for Handler {
         host: &str,
         ip: Ipv4Addr,
     ) -> Result<(), Error> {
-        self.update_ipv4_address(domain, host, &ip).await?;
+        self.update_ip_address(domain, host, &IpAddr::V4(ip)).await?;
         Ok(())
     }
     async fn update_ipv6_record(
@@ -103,7 +76,7 @@ impl UpdateHandler<AuthenticationData, RecordSpecification> for Handler {
         host: &str,
         ip: Ipv6Addr,
     ) -> Result<(), Error> {
-        self.update_ipv6_address(domain, host, &ip).await?;
+        self.update_ip_address(domain, host, &IpAddr::V6(ip)).await?;
         Ok(())
     }
 }

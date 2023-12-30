@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use strum_macros::{EnumDiscriminants, EnumString};
 
-use dyndns_service_godaddy::{self, godaddy, ydns};
+use dyndns_rs::{godaddy, ydns};
 
 pub type DnsRecordList = Vec<ServiceSpecifications>;
 
