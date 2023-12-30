@@ -1,19 +1,18 @@
 use std::net::{Ipv4Addr, Ipv6Addr};
 
-use super::record_specification::RecordSpecification;
-use super::AuthenticationData;
-use crate::error::Error;
-use crate::update_handler::UpdateHandler;
-use godaddy::{self, RecordType};
+use crate::{Error, RecordType, UpdateHandler};
 
-pub struct GoDaddyHandler {
-    authority: godaddy::Authority,
+use super::record_specification::RecordSpecification;
+use super::{AuthenticationData, Authority};
+
+pub struct Handler {
+    authority: Authority,
 }
 
-impl UpdateHandler<AuthenticationData, RecordSpecification> for GoDaddyHandler {
-    fn new(auth_data: &AuthenticationData) -> GoDaddyHandler {
-        let handler = GoDaddyHandler {
-            authority: godaddy::Authority::new(
+impl UpdateHandler<AuthenticationData, RecordSpecification> for Handler {
+    fn new(auth_data: &AuthenticationData) -> Handler {
+        let handler = Handler {
+            authority: Authority::new(
                 auth_data.api_key.as_str(),
                 auth_data.api_secret.as_str(),
                 auth_data.api_url.clone().into(),

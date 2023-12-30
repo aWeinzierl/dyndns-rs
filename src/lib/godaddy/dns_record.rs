@@ -1,7 +1,8 @@
 use serde::{Deserialize, Serialize};
 
-use super::DnsData;
-use super::RecordType;
+use crate::RecordType;
+
+use super::dns_data::DnsData;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct DnsRecord<'a> {

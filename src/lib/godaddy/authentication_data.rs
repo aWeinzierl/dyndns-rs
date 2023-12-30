@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use godaddy::PredefinedUrl;
+use crate::PredefinedUrl;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct AuthenticationData {

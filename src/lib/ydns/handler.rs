@@ -1,10 +1,11 @@
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 use std::panic::panic_any;
 
-use super::{AuthenticationData, RecordSpecification};
 use crate::error::Error;
 use crate::update_handler::UpdateHandler;
-use godaddy::{self, RecordType};
+use crate::RecordType;
+
+use super::{AuthenticationData, RecordSpecification};
 
 pub struct Handler {
     http_client: reqwest::Client,

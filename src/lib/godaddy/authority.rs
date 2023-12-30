@@ -1,10 +1,11 @@
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 use std::panic::panic_any;
 
-use super::DnsData;
-use super::DnsRecord;
+use crate::RecordType;
+
+use super::dns_data::DnsData;
+use super::dns_record::DnsRecord;
 use super::Error;
-use super::RecordType;
 
 pub struct Authority {
     api_url: url::Url,

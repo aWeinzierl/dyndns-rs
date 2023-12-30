@@ -6,7 +6,8 @@ pub enum Error {
     ReqwestError(reqwest::Error),
     ResolverError(String),
     AuthenticationError(String),
-    GodaddyError(godaddy::Error),
+    GoDaddyError(crate::godaddy::Error),
+    YDns(crate::godaddy::Error),
 }
 
 impl From<preferences::PreferencesError> for Error {
@@ -27,8 +28,8 @@ impl From<(Error, usize)> for Error {
     }
 }
 
-impl From<godaddy::Error> for Error {
-    fn from(error: godaddy::Error) -> Self {
-        Error::GodaddyError(error)
+impl From<crate::godaddy::Error> for Error {
+    fn from(error: crate::godaddy::Error) -> Self {
+        Error::GoDaddyError(error)
     }
 }

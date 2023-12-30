@@ -1,7 +1,6 @@
-use godaddy::RecordType;
 use std::net::{Ipv4Addr, Ipv6Addr};
 
-use crate::error::Error;
+use crate::{Error, RecordType};
 
 pub trait UpdateHandler<AuthenticationData, RecordSpecification> {
     fn new(auth_data: &AuthenticationData) -> Self;

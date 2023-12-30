@@ -1,17 +1,14 @@
 #![feature(async_closure)]
 
 mod dns_record_list;
-mod error;
-mod godaddy_handler;
 mod retry_handler;
-mod update_handler;
-mod ydns;
 
 use std::collections::{HashMap, HashSet};
 use std::future::Future;
 use std::net::{Ipv4Addr, Ipv6Addr};
 use std::str::FromStr;
 
+use dyndns_service_godaddy::*;
 use futures_retry::FutureRetry;
 use preferences::{AppInfo, Preferences};
 use public_ip::{addr_v4, addr_v6};
@@ -19,10 +16,7 @@ use serde::{Deserialize, Serialize};
 use strum_macros::{EnumDiscriminants, EnumString, IntoStaticStr};
 
 use dns_record_list::{DnsRecordList, DomainSpecifications, ServiceSpecificationsDiscriminants};
-use error::Error;
-use godaddy::RecordType;
 use retry_handler::RetryHandler;
-use update_handler::UpdateHandler;
 
 fn retry_handler() -> RetryHandler {
     RetryHandler::new(3, 100)
@@ -33,7 +27,7 @@ type AuthenticationDataList = Vec<AuthenticationData>;
 #[derive(Serialize, Deserialize, Debug, EnumDiscriminants, IntoStaticStr)]
 #[strum_discriminants(derive(EnumString, Hash))]
 enum AuthenticationData {
-    GoDaddy(godaddy_handler::AuthenticationData),
+    GoDaddy(godaddy::AuthenticationData),
     YDns(ydns::AuthenticationData),
 }
 
@@ -85,9 +79,7 @@ fn collect_record_types(dns_record_list: &DnsRecordList) -> HashSet<RecordType> 
     for service in dns_record_list {
         match service {
             dns_record_list::ServiceSpecifications::GoDaddy(specs) => {
-                collect_record_types_domain::<_, _, godaddy_handler::GoDaddyHandler>(
-                    &mut set, specs,
-                )
+                collect_record_types_domain::<_, _, godaddy::Handler>(&mut set, specs)
             }
             dns_record_list::ServiceSpecifications::YDns(specs) => {
                 collect_record_types_domain::<_, _, ydns::Handler>(&mut set, specs)
@@ -190,7 +182,7 @@ async fn main() -> Result<(), error::Error> {
                 let AuthenticationData::GoDaddy(auth_data) = auth_data else {
                     unreachable!()
                 };
-                let handler = godaddy_handler::GoDaddyHandler::new(auth_data);
+                let handler = godaddy::Handler::new(auth_data);
                 handle_domains_by_service(
                     handler,
                     specifications,

@@ -1,14 +1,14 @@
 use serde::{Deserialize, Serialize};
 use strum_macros::{EnumDiscriminants, EnumString};
 
-use crate::{godaddy_handler, ydns};
+use dyndns_service_godaddy::{self, godaddy, ydns};
 
 pub type DnsRecordList = Vec<ServiceSpecifications>;
 
 #[derive(Serialize, Deserialize, Debug, EnumDiscriminants)]
 #[strum_discriminants(derive(EnumString, Hash))]
 pub enum ServiceSpecifications {
-    GoDaddy(Vec<DomainSpecifications<godaddy_handler::RecordSpecification>>),
+    GoDaddy(Vec<DomainSpecifications<godaddy::RecordSpecification>>),
     YDns(Vec<DomainSpecifications<ydns::RecordSpecification>>),
 }
 
