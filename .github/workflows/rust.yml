@@ -17,7 +17,7 @@ jobs:
       matrix:
         target:
           - armv7-unknown-linux-gnueabihf
-          - armv6-unknown-linux-gnueabihf
+          - arm-unknown-linux-gnueabihf
           - x86_64-pc-windows-msvc
     steps:
     - uses: actions/checkout@v2
