@@ -1,7 +1,8 @@
- DynDNS Service for GoDaddy
-===========================
+ DynDNS Service
+===============
 
-[![Chat](https://img.shields.io/badge/chat-%23ddsg:matrix.org-%2346BC99?logo=Matrix)](https://matrix.to/#/#ddsg:matrix.org)
+[![Matrix](https://img.shields.io/matrix/dyndns-rs%3Amatrix.org?style=for-the-badge&logo=matrix&label=dyndns-rs)](https://matrix.to/#/#dyndns-rs:matrix.org)
+
 
 Login data example configuration:
 
