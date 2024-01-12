@@ -1,15 +1,15 @@
 use std::net::{Ipv4Addr, Ipv6Addr};
 
-use crate::{Error, RecordType, UpdateHandler};
+use crate::{Error, RecordSpecificationV6Adapter, UpdateHandler};
 
-use super::record_specification::RecordSpecification;
+use super::record_specification::{SpecificationV4, SpecificationV6};
 use super::{AuthenticationData, Authority};
 
 pub struct Handler {
     authority: Authority,
 }
 
-impl UpdateHandler<AuthenticationData, RecordSpecification> for Handler {
+impl UpdateHandler<AuthenticationData, SpecificationV4, SpecificationV6> for Handler {
     fn new(auth_data: &AuthenticationData) -> Handler {
         let handler = Handler {
             authority: Authority::new(
@@ -21,25 +21,27 @@ impl UpdateHandler<AuthenticationData, RecordSpecification> for Handler {
         handler
     }
 
-    fn record_type(specification: &RecordSpecification) -> RecordType {
-        specification.record_type
-    }
-
     async fn update_ipv6_record(
         &self,
-        specification: &RecordSpecification,
+        specification: &RecordSpecificationV6Adapter<SpecificationV6>,
         domain: &str,
         host: &str,
         ip: Ipv6Addr,
     ) -> Result<(), Error> {
+        if specification.custom_interface_id.is_some() {
+            return Err(super::error::Error::NotImplemented(
+                "No support for hard coded interface identifiers yet.",
+            )
+            .into());
+        }
         self.authority
-            .update_ipv6_address(domain, host, &ip, specification.ttl)
+            .update_ipv6_address(domain, host, &ip, specification.record_specification.ttl)
             .await?;
         Ok(())
     }
     async fn update_ipv4_record(
         &self,
-        specification: &RecordSpecification,
+        specification: &SpecificationV4,
         domain: &str,
         host: &str,
         ip: Ipv4Addr,

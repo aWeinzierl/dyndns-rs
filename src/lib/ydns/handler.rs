@@ -4,9 +4,9 @@ use std::panic::panic_any;
 use reqwest::StatusCode;
 
 use crate::update_handler::UpdateHandler;
-use crate::RecordType;
+use crate::RecordSpecificationV6Adapter;
 
-use super::{AuthenticationData, RecordSpecification};
+use super::{AuthenticationData, SpecificationV4, SpecificationV6};
 
 pub struct Handler {
     http_client: reqwest::Client,
@@ -44,7 +44,7 @@ impl Handler {
     }
 }
 
-impl UpdateHandler<AuthenticationData, RecordSpecification> for Handler {
+impl UpdateHandler<AuthenticationData, SpecificationV4, SpecificationV6> for Handler {
     fn new(AuthenticationData { username, secret }: &AuthenticationData) -> Self {
         let client = match reqwest::Client::builder().build() {
             Err(e) => panic_any(e),
@@ -60,13 +60,9 @@ impl UpdateHandler<AuthenticationData, RecordSpecification> for Handler {
         handler
     }
 
-    fn record_type(specification: &RecordSpecification) -> RecordType {
-        specification.record_type
-    }
-
     async fn update_ipv4_record(
         &self,
-        _specification: &RecordSpecification,
+        _specification: &SpecificationV4,
         domain: &str,
         host: &str,
         ip: Ipv4Addr,
@@ -77,13 +73,24 @@ impl UpdateHandler<AuthenticationData, RecordSpecification> for Handler {
     }
     async fn update_ipv6_record(
         &self,
-        _specification: &RecordSpecification,
+        specification: &RecordSpecificationV6Adapter<SpecificationV6>,
         domain: &str,
         host: &str,
-        ip: Ipv6Addr,
+        mut ip:Ipv6Addr,
     ) -> Result<(), crate::Error> {
+        if let Some(interface_id) = specification.custom_interface_id{
+            replace_interface_id(&mut ip, interface_id);
+        }
         self.update_ip_address(domain, host, &IpAddr::V6(ip))
             .await?;
         Ok(())
     }
+}
+
+fn replace_interface_id(ip: &mut Ipv6Addr, interface_id: Ipv6Addr) {
+    let interface_id = interface_id.segments();
+    let suffix = interface_id.rsplit_array_ref::<4>().1;
+    let mut ipv6_segments = ip.segments();
+    ipv6_segments[4..].copy_from_slice(suffix);
+    *ip = Ipv6Addr::from(ipv6_segments);
 }

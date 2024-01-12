@@ -1,4 +1,5 @@
 #![feature(async_closure)]
+#![feature(let_chains)]
 
 mod authentication_data;
 mod dns_record_list;
@@ -46,16 +47,19 @@ where
     Some(ip)
 }
 
-fn collect_record_types_domain<AuthData, Specification, Handler>(
+fn collect_record_types_domain<AuthData, SpecificationV4, SpecificationV6, Handler>(
     set: &mut HashSet<RecordType>,
-    specifications: &Vec<DomainSpecifications<Specification>>,
+    specifications: &Vec<DomainSpecifications<SpecificationV4, SpecificationV6>>,
 ) where
-    Handler: UpdateHandler<AuthData, Specification>,
+    Handler: UpdateHandler<AuthData, SpecificationV4, SpecificationV6>,
 {
     for specs in specifications {
         for specs in &specs.specifications {
-            for specification in &specs.specifications {
-                set.insert(Handler::record_type(specification));
+            if specs.ipv4.is_some() {
+                set.insert(RecordType::A);
+            }
+            if specs.ipv6.is_some() {
+                set.insert(RecordType::AAAA);
             }
         }
     }
@@ -66,10 +70,10 @@ fn collect_record_types(dns_record_list: &DnsRecordList) -> HashSet<RecordType> 
     for service in dns_record_list {
         match service {
             dns_record_list::ServiceSpecifications::GoDaddy(specs) => {
-                collect_record_types_domain::<_, _, godaddy::Handler>(&mut set, specs)
+                collect_record_types_domain::<_, _, _, godaddy::Handler>(&mut set, specs)
             }
             dns_record_list::ServiceSpecifications::YDns(specs) => {
-                collect_record_types_domain::<_, _, ydns::Handler>(&mut set, specs)
+                collect_record_types_domain::<_, _, _, ydns::Handler>(&mut set, specs)
             }
         };
     }
@@ -190,45 +194,31 @@ async fn main() -> Result<(), error::Error> {
     Ok(())
 }
 
-async fn handle_domains_by_service<'a, AuthData, RecordSpecification, Handler>(
+async fn handle_domains_by_service<'a, AuthData, SpecificationV4, SpecificationV6, Handler>(
     handler: Handler,
-    specifications: impl IntoIterator<Item = DomainSpecifications<RecordSpecification>>,
+    specifications: impl IntoIterator<Item = DomainSpecifications<SpecificationV4, SpecificationV6>>,
     should_be_processed: &dyn Fn(RecordType) -> bool,
     ipv4: Option<Ipv4Addr>,
     ipv6: Option<Ipv6Addr>,
 ) -> Result<(), error::Error>
 where
-    Handler: UpdateHandler<AuthData, RecordSpecification>,
+    Handler: UpdateHandler<AuthData, SpecificationV4, SpecificationV6>,
 {
     for domain in specifications {
         for host in domain.specifications {
-            for specification in host.specifications {
-                let record_type = Handler::record_type(&specification);
-                if !should_be_processed(record_type) {
-                    continue;
-                }
-                match record_type {
-                    RecordType::A => {
-                        handler
-                            .update_ipv4_record(
-                                &specification,
-                                &domain.domain_name,
-                                &host.host_name,
-                                ipv4.unwrap(),
-                            )
-                            .await?
-                    }
-                    RecordType::AAAA => {
-                        handler
-                            .update_ipv6_record(
-                                &specification,
-                                &domain.domain_name,
-                                &host.host_name,
-                                ipv6.unwrap(),
-                            )
-                            .await?
-                    }
-                }
+            if let Some(spec) = host.ipv4
+                && should_be_processed(RecordType::A)
+            {
+                handler
+                    .update_ipv4_record(&spec, &domain.domain_name, &host.host_name, ipv4.unwrap())
+                    .await?;
+            }
+            if let Some(spec) = host.ipv6
+                && should_be_processed(RecordType::A)
+            {
+                handler
+                    .update_ipv6_record(&spec, &domain.domain_name, &host.host_name, ipv6.unwrap())
+                    .await?;
             }
         }
     }

@@ -3,8 +3,8 @@
 
 [![Chat](https://img.shields.io/badge/chat-%23ddsg:matrix.org-%2346BC99?logo=Matrix)](https://matrix.to/#/#ddsg:matrix.org)
 
-
 Login data example configuration:
+
 ```JSON
 [
     {
@@ -17,23 +17,28 @@ Login data example configuration:
 ```
 
 DNS-record specification example configuration:
+
 ```JSON
 [
     {
         "YDns": [
             {
-                "domain_name": "matrix.org",
+                "domain_name": "test-domain.de",
                 "specifications": [
                     {
                         "host_name": "@",
-                        "specifications": [
-                            {
-                                "record_type": "A"
-                            },
-                            {
-                                "record_type": "AAAA"
-                            }
-                        ]
+                        "ipv4": null,
+                        "ipv6": {
+                            "record_specification": {},
+                            "custom_interface_id": "::1"
+                        }
+                    },
+                    {
+                        "host_name": "test12345",
+                        "ipv4": {}
+                        "ipv6": {
+                            "record_specification": {},
+                        }
                     }
                 ]
             }
@@ -41,4 +46,6 @@ DNS-record specification example configuration:
     }
 ]
 ```
-The JSON files need to be stored in `C:\Users\%username%\AppData\Roaming\Andreas Weinzierl\DynDns Service\` in Windows with the names `authentication.prefs.json` and `dns-entries.prefs.json`.
+
+The JSON files need to be stored in `C:\Users\%username%\AppData\Roaming\Andreas Weinzierl\DynDns Service\` on Windows with the names `authentication.prefs.json` and `dns-entries.prefs.json`.
+Linux requires these files in `/home/user/.config/DynDns Service/`.

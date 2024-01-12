@@ -1,6 +1,7 @@
 pub enum Error {
     Reqwest(reqwest::Error),
     SerdeJson(serde_json::Error),
+    NotImplemented(&'static str),
 }
 
 impl std::fmt::Debug for Error {
@@ -8,6 +9,7 @@ impl std::fmt::Debug for Error {
         match self {
             Error::Reqwest(e) => e.fmt(f),
             Error::SerdeJson(e) => e.fmt(f),
+            Error::NotImplemented(e) => e.fmt(f),
         }
     }
 }
@@ -21,5 +23,11 @@ impl From<reqwest::Error> for Error {
 impl From<serde_json::Error> for Error {
     fn from(err: serde_json::Error) -> Error {
         Error::SerdeJson(err)
+    }
+}
+
+impl From<&'static str> for Error {
+    fn from(err: &'static str) -> Error {
+        Error::NotImplemented(err)
     }
 }
