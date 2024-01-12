@@ -214,7 +214,7 @@ where
                     .await?;
             }
             if let Some(spec) = host.ipv6
-                && should_be_processed(RecordType::A)
+                && should_be_processed(RecordType::AAAA)
             {
                 handler
                     .update_ipv6_record(&spec, &domain.domain_name, &host.host_name, ipv6.unwrap())
