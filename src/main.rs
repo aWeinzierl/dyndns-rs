@@ -37,7 +37,7 @@ async fn get_ip_address_by_resolver<Resolver, AddrFuture, AddrType>(
     resolve: Resolver,
 ) -> Option<AddrType>
 where
-    Resolver: Fn() -> AddrFuture + Clone + Send + 'static,
+    Resolver: Fn() -> AddrFuture + Copy + Send + 'static,
     AddrFuture: Future<Output = Option<AddrType>> + Send + 'static,
 {
     let ip = FutureRetry::new(async || resolve().await.ok_or(()), retry_handler())
