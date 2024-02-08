@@ -233,6 +233,7 @@ dependencies = [
  "strum_macros",
  "tokio",
  "url",
+ "ux2",
 ]
 
 [[package]]
@@ -1349,6 +1350,26 @@ dependencies = [
  "idna 0.5.0",
  "percent-encoding",
  "serde",
+]
+
+[[package]]
+name = "ux2"
+version = "0.8.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6b0e70b5d0cc298ac2659b20c97c08037791e7ee801dd8eb2285e7a52f182109"
+dependencies = [
+ "serde",
+ "ux2-macros",
+]
+
+[[package]]
+name = "ux2-macros"
+version = "0.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c8002236fca477c18a03bbd90f32224000443bfd0315b6a2c548945230eaf667"
+dependencies = [
+ "proc-macro2",
+ "quote",
 ]
 
 [[package]]

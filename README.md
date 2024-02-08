@@ -31,7 +31,10 @@ DNS-record specification example configuration:
                         "ipv4": null,
                         "ipv6": {
                             "record_specification": {},
-                            "custom_interface_id": "::1"
+                            "custom_interface_id": {
+                                "prefix_length": 5,
+                                "interface_id": "::1",
+                            }
                         }
                     },
                     {
