@@ -3,3 +3,6 @@ linker = "arm-linux-gnueabihf-gcc"
 
 [target.arm-unknown-linux-gnueabihf]
 linker = "arm-linux-gnueabihf-gcc"
+
+[env]
+RUSTFLAGS="-Z threads = 8"
