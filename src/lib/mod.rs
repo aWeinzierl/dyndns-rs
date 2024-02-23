@@ -1,4 +1,5 @@
 #![feature(split_array)]
+#![feature(ip_bits)]
 
 pub mod godaddy;
 pub mod ydns;

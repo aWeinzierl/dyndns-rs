@@ -11,14 +11,15 @@ strum = "0.26"
 strum_macros = "0.26"
 reqwest = { version = "0.11", features = ["json", "rustls-tls"], default-features = false }
 serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0.57"
+serde_json = "1.0"
 public-ip = "0.2"
 futures-retry = "0.6"
-preferences = {version="2.0", package = "preferences-serde1"}
+preferences = { version = "2.0", package = "preferences-serde1"}
 url = { version = "2.1", features = ["serde"] }
 serde_urlencoded = "0.7"
 tokio = { version = "1.35", features = ["macros"] }
 async-trait = "0.1"
+ux2 = { version = "0.8", features = ["serde"] }
 
 [lib]
 path = "src/lib/mod.rs"

@@ -2,6 +2,7 @@ use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 use std::panic::panic_any;
 
 use reqwest::StatusCode;
+use ux2::u6;
 
 use crate::update_handler::UpdateHandler;
 use crate::RecordSpecificationV6Adapter;
@@ -78,8 +79,8 @@ impl UpdateHandler<AuthenticationData, SpecificationV4, SpecificationV6> for Han
         host: &str,
         mut ip:Ipv6Addr,
     ) -> Result<(), crate::Error> {
-        if let Some(interface_id) = specification.custom_interface_id{
-            replace_interface_id(&mut ip, interface_id);
+        if let Some(custom_interface_id) = &specification.custom_interface_id{
+            replace_interface_id(&mut ip, custom_interface_id.prefix_length, custom_interface_id.interface_id);
         }
         self.update_ip_address(domain, host, &IpAddr::V6(ip))
             .await?;
@@ -87,10 +88,9 @@ impl UpdateHandler<AuthenticationData, SpecificationV4, SpecificationV6> for Han
     }
 }
 
-fn replace_interface_id(ip: &mut Ipv6Addr, interface_id: Ipv6Addr) {
-    let interface_id = interface_id.segments();
-    let suffix = interface_id.rsplit_array_ref::<4>().1;
-    let mut ipv6_segments = ip.segments();
-    ipv6_segments[4..].copy_from_slice(suffix);
-    *ip = Ipv6Addr::from(ipv6_segments);
+fn replace_interface_id(ip: &mut Ipv6Addr, prefix_length: u6, interface_id: Ipv6Addr) {
+    let prefix_length = u8::from(prefix_length);
+    let prefix_mask = Ipv6Addr::from_bits((i128::MIN >> prefix_length) as u128);
+    (*ip) &= prefix_mask;
+    (*ip) |= interface_id;
 }
